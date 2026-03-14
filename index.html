@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>いわくにバス 乗り場ガイド (Kd路線 シンプル版)</title>
+    <style>
+        body { font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        header { background: #d32f2f; color: white; padding: 15px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        #container { display: flex; flex: 1; overflow: hidden; }
+        #list { width: 300px; border-right: 1px solid #ccc; overflow-y: auto; padding: 10px; background: #fafafa; }
+        #map-container { flex: 1; position: relative; }
+        iframe { width: 100%; height: 100%; border: none; }
+        .bus-stop { 
+            padding: 12px; margin-bottom: 8px; background: white; border: 1px solid #ddd; 
+            cursor: pointer; transition: all 0.2s; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .bus-stop:hover { background: #ffebee; border-color: #d32f2f; }
+        .bus-stop h3 { margin: 0; font-size: 16px; color: #333; }
+        .active { background: #ffebee !important; border-color: #d32f2f !important; }
+    </style>
+
+    <!-- PWA Settings -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js');
+        }
+    </script>
+</head>
+<body>
+
+<header>
+    <h2 style="margin:0;">いわくにバス 乗り場ガイド</h2>
+    <small>Kd路線: 岩国駅 ～ 錦帯橋 ～ 新岩国駅</small>
+</header>
+
+<div id="container">
+    <div id="list">
+        <!-- JSで動的に生成 -->
+    </div>
+    <div id="map-container">
+        <iframe id="gmap" src="https://www.google.com/maps?q=岩国駅&output=embed"></iframe>
+        <div id="overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.7); font-weight: bold; color: #555; pointer-events: none;">
+            左のリストからバス停を選択してください
+        </div>
+    </div>
+</div>
+
+<script>
+    const stops = [
+        { name: "岩国駅", query: "岩国駅 バス乗り場" },
+        { name: "中央通り", query: "岩国市 中央通り バス停" },
+        { name: "岩国税務署", query: "岩国税務署 バス停" },
+        { name: "フレスタモールカジル岩国", query: "フレスタモールカジル岩国 バス停" },
+        { name: "室の木", query: "岩国市 室の木 バス停" },
+        { name: "医師会病院", query: "岩国市 医師会病院 バス停" },
+        { name: "桜地蔵", query: "岩国市 桜地蔵 バス停" },
+        { name: "弘法寺", query: "岩国市 弘法寺 バス停" },
+        { name: "東錦見", query: "岩国市 東錦見 バス停" },
+        { name: "裁判所", query: "岩国市 裁判所 バス停" },
+        { name: "錦見", query: "岩国市 錦見 バス停" },
+        { name: "新町", query: "岩国市 新町 バス停" },
+        { name: "椎尾神社", query: "椎尾神社 バス停" },
+        { name: "錦帯橋", query: "錦帯橋 バスセンター" },
+        { name: "池ヶ迫", query: "岩国市 池ヶ迫 バス停" },
+        { name: "大内迫", query: "岩国市 大内迫 バス停" },
+        { name: "関戸", query: "岩国市 関戸 バス停" },
+        { name: "下多田", query: "岩国市 下多田 バス停" },
+        { name: "岩国インターバスターミナル", query: "岩国インターバスターミナル" },
+        { name: "御庄大橋", query: "岩国市 御庄大橋 バス停" },
+        { name: "沖市", query: "岩国市 沖市 バス停" },
+        { name: "新岩国駅", query: "新岩国駅 バス乗り場" }
+    ];
+
+    const listEl = document.getElementById('list');
+    const iframe = document.getElementById('gmap');
+    const overlay = document.getElementById('overlay');
+
+    stops.forEach(stop => {
+        const div = document.createElement('div');
+        div.className = 'bus-stop';
+        div.innerHTML = `<h3>${stop.name}</h3>`;
+        
+        div.onclick = () => {
+            iframe.src = `https://www.google.com/maps?q=${encodeURIComponent(stop.query)}&output=embed`;
+            updateActive(div);
+        };
+
+        listEl.appendChild(div);
+    });
+
+    function updateActive(el) {
+        overlay.style.display = 'none';
+        Array.from(listEl.children).forEach(child => child.classList.remove('active'));
+        el.classList.add('active');
+    }
+</script>
+
+</body>
+</html>
